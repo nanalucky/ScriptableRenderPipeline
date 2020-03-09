@@ -163,18 +163,25 @@ namespace UnityEngine.Rendering.HighDefinition.Compositor
         {
             Assert.IsNotNull(sp);
 
-            // Check if property already exists / do not add duplicates
-            int indx = m_ShaderProperties.FindIndex(s => s.m_PropertyName == sp.m_PropertyName);
-            if (indx < 0)
+            // Check if property should be shown in the inspector
+            bool hide = ((int)sp.m_Flags & (int)ShaderPropertyFlags.NonModifiableTextureData) != 0
+                        || ((int)sp.m_Flags & (int)ShaderPropertyFlags.HideInInspector) != 0;
+
+            
+            if (!hide)
             {
-                m_ShaderProperties.Add(sp);
+                // Check if property already exists / do not add duplicates
+                int indx = m_ShaderProperties.FindIndex(s => s.m_PropertyName == sp.m_PropertyName);
+                if (indx < 0)
+                {
+                    m_ShaderProperties.Add(sp);
+                }
             }
 
-            bool hide = ((int)sp.m_Flags & (int)ShaderPropertyFlags.NonModifiableTextureData) != 0;
             // For textures, check if we already have this layer in the layer list. If not, add it.
             if (sp.m_Type == ShaderPropertyType.Texture)
             {
-                indx = m_InputLayers.FindIndex(s => s.m_LayerName == sp.m_PropertyName);
+                int indx = m_InputLayers.FindIndex(s => s.m_LayerName == sp.m_PropertyName);
                 if (indx < 0 && !hide)
                 {
                     Debug.Log($"Adding output layer from shader graph: {sp.m_PropertyName}");
@@ -183,7 +190,7 @@ namespace UnityEngine.Rendering.HighDefinition.Compositor
                 }
                 else if (indx >= 0 && hide)
                 {
-                    // if a layer already in the list is now hidden, remove it
+                    // if a layer that was in the list is now hidden, remove it
                     RemoveLayerAtIndex(indx);
                 }
             }
