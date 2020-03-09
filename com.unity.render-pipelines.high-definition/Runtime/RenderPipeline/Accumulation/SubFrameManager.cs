@@ -195,7 +195,7 @@ namespace UnityEngine.Rendering.HighDefinition
         /// <summary>
         /// Should be called to start a multi-frame recording session. Each final frame will be an accumulation of multiple sub-frames.
         /// </summary>
-        /// <param name="samples">The number of subframes. Each recorded frame will be an accumulation of this number of frames</param>
+        /// <param name="samples">The number of subframes. Each recorded frame will be an accumulation of this number of framesIn case path tracing is enabled, this value will override the settign in the volume.</param>
         /// <param name="shutterInterval">The duration the shutter of the virtual camera is open (for motion blur). Between 0 and 1.</param>
         /// <param name="shutterFullyOpen">The time it takes for the shutter to fully open. Between 0 and 1.</param>
         /// <param name="shutterBeginsClosing">The time when the shutter starts closing. Between 0 and 1.</param>
@@ -207,7 +207,7 @@ namespace UnityEngine.Rendering.HighDefinition
         /// <summary>
         /// Should be called to start a multi-frame recording session. Each final frame will be an accumulation of multiple sub-frames.
         /// </summary>
-        /// <param name="samples">The number of subframes. Each recorded frame will be an accumulation of this number of frames</param>
+        /// <param name="samples">The number of subframes. Each recorded frame will be an accumulation of this number of frames. In case path tracing is enabled, this value will override the settign in the volume.</param>
         /// <param name="shutterInterval">The duration the shutter of the virtual camera is open (for motion blur). Between 0 and 1.</param>
         /// <param name="shutterProfile">An animation curve (between 0 and 1) denoting the motion of the camera shutter.</param>
         public void BeginRecording(int samples, float shutterInterval, AnimationCurve shutterProfile)
