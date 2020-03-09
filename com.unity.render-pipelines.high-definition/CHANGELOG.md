@@ -7,7 +7,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [Unreleased]
 
 ### Added
-- Support Cookies for AreaLight:Disc on backing
 - Ray tracing support for VR single-pass
 - Added sharpen filter shader parameter and UI for TemporalAA to control image quality instead of hardcoded value
 - Added frame settings option for custom post process and custom passes as well as custom color buffer format option.
@@ -83,6 +82,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added a path tracing test to the test suite.
 - Added a warning and workaround instructions that appear when you enable XR single-pass after the first frame with the XR SDK.
 - Added the exposure sliders to the planar reflection probe preview
+- Added support of Cookies for AreaLight:Disc on backing
 
 ### Fixed
 - Update documentation of HDRISky-Backplate, precise how to have Ambient Occlusion on the Backplate
