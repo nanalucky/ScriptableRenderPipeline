@@ -51,7 +51,7 @@ namespace UnityEngine.Rendering.HighDefinition
     }
     public partial class HDRenderPipeline
     {
-        PathTracing m_PathTracingSettings;
+        PathTracing m_PathTracingSettings = null;
 
         uint  m_CurrentIteration = 0;
 #if UNITY_EDITOR
@@ -92,7 +92,7 @@ namespace UnityEngine.Rendering.HighDefinition
         private void OnSceneEdit()
         {
             // If we just change the sample count, we don't want to reset iteration
-            if (m_CacheMaxIteration != m_PathTracingSettings.maximumSamples.value)
+            if (m_PathTracingSettings && m_CacheMaxIteration != m_PathTracingSettings.maximumSamples.value)
             {
                 m_CacheMaxIteration = (uint) m_PathTracingSettings.maximumSamples.value;
                 if (m_CurrentIteration >= m_CacheMaxIteration)
