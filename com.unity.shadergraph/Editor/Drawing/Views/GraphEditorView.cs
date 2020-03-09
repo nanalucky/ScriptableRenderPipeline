@@ -300,20 +300,20 @@ namespace UnityEditor.ShaderGraph.Drawing
                         nodeData.AddSlot(new BooleanMaterialSlot(1, "", "", SlotType.Output, false));
                         break;
                     case SlotValueType.Vector1:
-                        nodeData.AddSlot(new Vector1MaterialSlot(0, "", "", SlotType.Input, 0));
-                        nodeData.AddSlot(new Vector1MaterialSlot(1, "", "", SlotType.Output, 0));
+                        nodeData.AddSlot(new DynamicVectorMaterialSlot(0, "", "", SlotType.Input, Vector4.zero));
+                        nodeData.AddSlot(new DynamicVectorMaterialSlot(1, "", "", SlotType.Output, Vector4.zero));
                         break;
                     case SlotValueType.Vector2:
-                        nodeData.AddSlot(new Vector2MaterialSlot(0, "", "", SlotType.Input, Vector4.zero));
-                        nodeData.AddSlot(new Vector2MaterialSlot(1, "", "", SlotType.Output, Vector4.zero));
+                        nodeData.AddSlot(new DynamicVectorMaterialSlot(0, "", "", SlotType.Input, Vector4.zero));
+                        nodeData.AddSlot(new DynamicVectorMaterialSlot(1, "", "", SlotType.Output, Vector4.zero));
                         break;
                     case SlotValueType.Vector3:
-                        nodeData.AddSlot(new Vector3MaterialSlot(0, "", "", SlotType.Input, Vector4.zero));
-                        nodeData.AddSlot(new Vector3MaterialSlot(1, "", "", SlotType.Output, Vector4.zero));
+                        nodeData.AddSlot(new DynamicVectorMaterialSlot(0, "", "", SlotType.Input, Vector4.zero));
+                        nodeData.AddSlot(new DynamicVectorMaterialSlot(1, "", "", SlotType.Output, Vector4.zero));
                         break;
                     case SlotValueType.Vector4:
-                        nodeData.AddSlot(new Vector4MaterialSlot(0, "", "", SlotType.Input, Vector4.zero));
-                        nodeData.AddSlot(new Vector4MaterialSlot(1, "", "", SlotType.Output, Vector4.zero));
+                        nodeData.AddSlot(new DynamicVectorMaterialSlot(0, "", "", SlotType.Input, Vector4.zero));
+                        nodeData.AddSlot(new DynamicVectorMaterialSlot(1, "", "", SlotType.Output, Vector4.zero));
                         break;
                     case SlotValueType.Matrix2:
                         nodeData.AddSlot(new Matrix2MaterialSlot(0, "", "", SlotType.Input));
@@ -1046,7 +1046,47 @@ namespace UnityEditor.ShaderGraph.Drawing
                 if (nodeView is MaterialNodeView materialNodeView)
                 {
                     materialNodeView.UpdatePortInputTypes();
+                    Debug.Log("sagsf" + nodeView.title);
                 }
+
+                //List<RedirectNodeView> redirectNodesToUpdate = new List<RedirectNodeView>();
+                if (nodeView is RedirectNodeView redirectNodeView)
+                {
+                    // Gather only the top level redirect node
+                    foreach (var anchorView in redirectNodeView.inputContainer.Children().OfType<Port>())
+                    {
+                        foreach (var edgeView in anchorView.connections)
+                        {
+                            var targetSlot = edgeView.input.GetSlot();
+                            var nodeEdges = m_Graph.GetEdges(targetSlot.slotReference);
+                            foreach (var edge in nodeEdges)
+                            {
+                                var fromSocketRef = edge.outputSlot;
+                                var parentNode = m_Graph.GetNodeFromGuid(fromSocketRef.nodeGuid);
+                                // If child node of this slot is a normal Node, not a redirect node add this Redirect node to the list.
+                                if (parentNode != null && parentNode.GetType() != typeof(RedirectNodeData))
+                                {
+                                    //Debug.Log("FOUND PARENT:: " + parentNode.name);
+                                    //if (!redirectNodesToUpdate.Contains(redirectNodeView))
+                                    //{
+                                        redirectNodeView.UpdatePortInputTypes();
+                                        //redirectNodesToUpdate.Add(redirectNodeView);
+                                        //Debug.Log("Found one");
+                                    //}
+                                }
+                            }
+                        }
+                    }
+
+
+
+                    //redirectNodeView.UpdateSlots();
+
+                    //Debug.Log("vlsdfj" + nodeView.title);
+                }
+
+                //Debug.Log("LENGTH: " + redirectNodesToUpdate.Count);
+
                 foreach (var anchorView in nodeView.outputContainer.Children().OfType<Port>())
                 {
                     foreach (var edgeView in anchorView.connections)
@@ -1063,6 +1103,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                         }
                     }
                 }
+
                 foreach (var anchorView in nodeView.inputContainer.Children().OfType<Port>())
                 {
                     var targetSlot = anchorView.GetSlot();
@@ -1079,6 +1120,41 @@ namespace UnityEditor.ShaderGraph.Drawing
                     }
                 }
             }
+
+
+
+            // var redirectNodes = GetNodes<RedirectNodeData>().ToArray();
+            // Debug.Log("REDIRS " +redirectNodes.Count());
+            // List<RedirectNodeData> redirectNodesToUpdate = new List<RedirectNodeData>();
+            // foreach (RedirectNodeData redirectNode in redirectNodes)
+            // {
+            //     redirectNode.GetInputSlots(slots);
+            //     foreach (var inputSlot in slots)
+            //     {
+            //
+            //         var nodeEdges = GetEdges(inputSlot.slotReference);
+            //         foreach (var edge in nodeEdges)
+            //         {
+            //             var fromSocketRef = edge.outputSlot;
+            //             var parentNode = GetNodeFromGuid(fromSocketRef.nodeGuid);
+            //             // If child node of this slot is a normal Node, not a redirect node add this Redirect node to the list.
+            //             if (parentNode != null && parentNode.GetType() != typeof(RedirectNodeData))
+            //             {
+            //                 Debug.Log("FOUND PARENT:: " + parentNode.name);
+            //                 //RedirectNodeData redirData = childNode as RedirectNodeData;
+            //                 if (!redirectNodesToUpdate.Contains(redirectNode))
+            //                 {
+            //
+            //                     redirectNodesToUpdate.Add(redirectNode);
+            //                     Debug.Log("Found one");
+            //                 }
+            //             }
+            //         }
+            //     }
+            // }
+            //
+            // Debug.Log("LENGTH: " + redirectNodesToUpdate.Count);
+
         }
 
         void OnPrimaryMasterChanged()

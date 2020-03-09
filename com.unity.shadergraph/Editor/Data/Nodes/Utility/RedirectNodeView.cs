@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -52,26 +53,129 @@ namespace UnityEditor.ShaderGraph
             InitializeFromEdge(nodeData.m_Edge, m_GraphView);
         }
 
-        public void UpdateSlots(IEnumerable<MaterialSlot> slots)
+        //public void UpdateSlots(IEnumerable<MaterialSlot> slots)
+        public void UpdateSlots(Edge edge)
         {
-            foreach (var slot in slots)
+            // Set the color of the ports
+            foreach (var port in inputContainer.Query<Port>().ToList())
             {
-                if (slot.hidden)
-                    continue;
-
-                var port = ShaderPort.Create(slot, m_ConnectorListener);
-
-
-                // Clear first to remove old slots
-                // Need to get the Edges to reconnect edges.
-                outputContainer.Clear();
-                inputContainer.Clear();
-
-                if (slot.isOutputSlot)
-                    outputContainer.Add(port);
-                else
-                    inputContainer.Add(port);
+                port.visualClass = edge.output.GetSlot().concreteValueType.ToClassName();
             }
+
+            foreach (var port in outputContainer.Query<Port>().ToList())
+            {
+                port.visualClass = edge.output.GetSlot().concreteValueType.ToClassName();
+                foreach (Edge connection in port.connections)
+                {
+                    if (connection.input.GetSlot().owner is RedirectNodeData redirectNode)
+                    {
+                        redirectNode.nodeView.UpdateSlots(connection);
+                    }
+                }
+            }
+        }
+
+        void GetAllRedirectNodes(RedirectNodeData node, ref List<RedirectNodeData> allNodes)
+        {
+            if(node == null)
+                return;
+            allNodes.Add(node);
+            foreach (var port in node.nodeView.outputContainer.Children().OfType<ShaderPort>())
+            {
+                var slot = port.slot;
+                var graph = slot.owner.owner;
+                var edges = graph.GetEdges(slot.slotReference).ToList();
+
+                foreach (IEdge edge in edges)
+                {
+                    // get the input details
+                    var inputSlotRef = edge.inputSlot;
+                    var inputNode = graph.GetNodeFromGuid(inputSlotRef.nodeGuid);
+                    if (inputNode is RedirectNodeData redirectNode)
+                    {
+                        GetAllRedirectNodes(redirectNode, ref allNodes);
+                    }
+                }
+            }
+        }
+
+        public void UpdatePortInputTypes()
+        {
+            // Get all the RedirectNodes and update them all in one go.
+            List<RedirectNodeData> connectedRedirectNodes = new List<RedirectNodeData>();
+            // Always add first node / this node
+            GetAllRedirectNodes(node as RedirectNodeData, ref connectedRedirectNodes);
+
+            // Get the concrete value type of the incoming edge output
+            string concreteValueType = "";
+            foreach (var port in inputContainer.Children().OfType<ShaderPort>())
+            {
+                var slot = port.slot;
+                var graph = slot.owner.owner;
+                var edges = graph.GetEdges(slot.slotReference).ToList();
+
+                // get the output details
+                var outputSlotRef = edges[0].outputSlot;
+                var outputNode = graph.GetNodeFromGuid(outputSlotRef.nodeGuid);
+                concreteValueType = outputNode.FindOutputSlot<MaterialSlot>(outputSlotRef.slotId).concreteValueType.ToClassName();
+            }
+
+            foreach (RedirectNodeData redirectNode in connectedRedirectNodes)
+            {
+                foreach (var port in redirectNode.nodeView.inputContainer.Children().Concat(redirectNode.nodeView.outputContainer.Children()).OfType<ShaderPort>())
+                {
+                    port.visualClass = concreteValueType;
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                // foreach (Edge graphEdge in graph.edges)
+                // {
+                //     graph.
+                // }
+                //var edge = graph.GetEdges(slot.slotReference).First();
+
+                //anchor.visualClass = edges.output.GetSlot().concreteValueType.ToClassName();
+
+
+
+
+
+
+
+
+                //Debug.Log(edges.Count());
+            //}
+            // // Set the color of the ports
+            // foreach (var port in inputContainer.Query<Port>().ToList())
+            // {
+            //     port.visualClass = edge.output.GetSlot().concreteValueType.ToClassName();
+            // }
+            //
+            // foreach (var port in outputContainer.Query<Port>().ToList())
+            // {
+            //     port.visualClass = edge.output.GetSlot().concreteValueType.ToClassName();
+            //     foreach (Edge connection in port.connections)
+            //     {
+            //         if (connection.input.GetSlot().owner is RedirectNodeData redirictNode)
+            //         {
+            //             redirictNode.nodeView.UpdateSlots(connection);
+            //         }
+            //     }
+            // }
         }
 
         public void AddSlots(IEnumerable<MaterialSlot> slots)
@@ -82,7 +186,6 @@ namespace UnityEditor.ShaderGraph
                     continue;
 
                 var port = ShaderPort.Create(slot, m_ConnectorListener);
-                //var port = ShaderPort.CreateWithNoEdgeConnector(slot);
 
                 if (slot.isOutputSlot)
                     outputContainer.Add(port);
@@ -132,7 +235,7 @@ namespace UnityEditor.ShaderGraph
         public void Dispose()
         {
             node = null;
-            ((VisualElement)this).userData = null;
+            userData = null;
         }
 
         public void OnModified(ModificationScope scope)
@@ -140,10 +243,15 @@ namespace UnityEditor.ShaderGraph
 
         }
 
-        public void UpdatePortInputTypes()
-        {
-
-        }
+        // public void UpdatePortInputTypes()
+        // {
+        //     // foreach (var anchor in inputContainer.Children().Concat(outputContainer.Children()).OfType<ShaderPort>())
+        //     // {
+        //     //     var slot = anchor.slot;
+        //     //     //anchor.portName = slot.displayName;
+        //     //     anchor.visualClass = slot.concreteValueType.ToClassName();
+        //     // }
+        // }
 
         public void SetColor(Color newColor)
         {

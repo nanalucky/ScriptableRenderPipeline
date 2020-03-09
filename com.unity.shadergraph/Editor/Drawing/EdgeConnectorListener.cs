@@ -35,12 +35,13 @@ namespace UnityEditor.ShaderGraph.Drawing
             {
                 m_Graph.owner.RegisterCompleteObjectUndo("Connect Edge");
 
-                if (rightSlot.owner is RedirectNodeData)
+                if (rightSlot.owner is RedirectNodeData redirectNodeData)
                 {
-                    
+                    redirectNodeData.nodeView.UpdateSlots(edge);
                 }
 
                 m_Graph.Connect(leftSlot.slotReference, rightSlot.slotReference);
+
             }
         }
     }
