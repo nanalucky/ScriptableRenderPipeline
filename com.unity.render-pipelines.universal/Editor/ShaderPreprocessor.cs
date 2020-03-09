@@ -263,7 +263,10 @@ namespace UnityEditor.Rendering.Universal
             }
             foreach (UniversalRenderPipelineAsset urp in urps)
             {
-                _supportedFeatures |= GetSupportedShaderFeatures(urp);
+                if (urp != null)
+                {
+                    _supportedFeatures |= GetSupportedShaderFeatures(urp);
+                }
             }
         }
 
