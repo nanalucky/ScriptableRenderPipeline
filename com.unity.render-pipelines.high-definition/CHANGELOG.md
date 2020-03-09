@@ -429,6 +429,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed invalid cast for realtime reflection probes (case 1220504)
 - Fixed invalid game view rendering when disabling all cameras in the scene (case 1105163)
 - Hide reflection probes in the renderer components.
+- Half fixed shuriken particle light that cast shadows (only the first one will be correct)
 
 ### Changed
 - Color buffer pyramid is not allocated anymore if neither refraction nor distortion are enabled
