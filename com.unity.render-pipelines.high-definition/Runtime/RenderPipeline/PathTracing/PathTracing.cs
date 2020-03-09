@@ -54,12 +54,13 @@ namespace UnityEngine.Rendering.HighDefinition
         PathTracing m_PathTracingSettings;
 
         uint  m_CurrentIteration = 0;
-
-        uint  m_CacheLightCount = 0;
-        ulong m_CacheAccelSize = 0;
 #if UNITY_EDITOR
         uint  m_CacheMaxIteration = 0;
 #endif // UNITY_EDITOR
+        ulong m_CacheAccelSize = 0;
+        uint  m_CacheLightCount = 0;
+        uint  m_CacheCameraWidth = 0;
+        uint  m_CacheCameraHeight = 0;
 
         bool m_CameraSkyEnabled;
 
@@ -123,6 +124,15 @@ namespace UnityEngine.Rendering.HighDefinition
             if (cameraSkyEnabled != m_CameraSkyEnabled)
             {
                 m_CameraSkyEnabled = cameraSkyEnabled;
+                m_CurrentIteration = 0;
+                return;
+            }
+
+            // Check camera resolution dirtiness
+            if (hdCamera.actualWidth != m_CacheCameraWidth || hdCamera.actualHeight != m_CacheCameraHeight)
+            {
+                m_CacheCameraWidth = (uint) hdCamera.actualWidth;
+                m_CacheCameraHeight = (uint) hdCamera.actualHeight;
                 m_CurrentIteration = 0;
                 return;
             }
