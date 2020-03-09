@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fix LookDev EnvironmentLibrary tab when asset is deleted
 - Fix LookDev used Cubemap when asset is deleted
 - Fixed the definition of `rcp()` for GLES2.
+- Fix LookDev issue when adding a GameObject containing a Volume into the LookDev's view.
 
 ### Changed
 - Restored usage of ENABLE_VR to fix compilation errors on some platforms.
