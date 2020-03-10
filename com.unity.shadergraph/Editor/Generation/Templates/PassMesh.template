@@ -62,6 +62,8 @@ Pass
     $splice(GraphDefines)
     $splice(DotsInstancingVars)
 
+    $splice(HybridV1InjectedBuiltinProperties)
+
     // Includes
     $splice(PreGraphIncludes)
 
