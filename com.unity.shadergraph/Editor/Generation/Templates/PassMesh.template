@@ -15,13 +15,13 @@ Pass
     // --------------------------------------------------
     // Pass
 
-    HLSLPROGRAMo
+    HLSLPROGRAM
 
     // Pragmas
     $splice(PassPragmas)
 
     $splice(DotsInstancingOptions)
-    $splice(DotsInstancedProperties)
+    $splice(HybridV1InjectedBuiltinProperties)
 
     // Keywords
     $splice(PassKeywords)
@@ -61,8 +61,6 @@ Pass
     $splice(PassInstancing)
     $splice(GraphDefines)
     $splice(DotsInstancingVars)
-
-    $splice(HybridV1InjectedBuiltinProperties)
 
     // Includes
     $splice(PreGraphIncludes)
