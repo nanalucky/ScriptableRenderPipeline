@@ -292,7 +292,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 var leftSlot = context.edge.output.GetSlot();
                 var rightSlot = context.edge.input.GetSlot();
 
-                nodeData.slotReferenceInput = leftSlot.slotReference;
+                //nodeData.slotReferenceInput = leftSlot.slotReference;
                 // Valuetype gets the type should be the type for input and output
                 switch(leftSlot.valueType)
                 {

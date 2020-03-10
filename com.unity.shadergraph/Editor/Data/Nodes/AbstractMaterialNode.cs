@@ -279,8 +279,16 @@ namespace UnityEditor.ShaderGraph
                 if (fromNode == null)
                     return string.Empty;
 
+                // Problem here is that this could be true, but maybe the next edge going out is not there.
+                // You still get the slot reference.....
+                // Looks like we still need to traverse this every time, until an actual node or empty.
+
+                // Need this to know that it wants to be coming from the right side of the graph
+                // and then convert what value type it has
+
                 if (fromNode is RedirectNodeData redirNode)
                 {
+                    // Old Old way
                     //redirNode.m_OutputConcreteSlotValueType = inputSlot.concreteValueType;
                     // Need to find the end of this chain of redirect nodes
                     // var fromLeftSlot = redirNode.nodeView.GetLeftMostSlotReference();
@@ -291,13 +299,28 @@ namespace UnityEditor.ShaderGraph
                     //     var fromLeftNode = owner.GetNodeFromGuid<AbstractMaterialNode>(fromLeftSlot.Value.nodeGuid);
                     //     return ShaderGenerator.AdaptNodeOutput(fromLeftNode, fromLeftSlot.Value.slotId, inputSlot.concreteValueType);
                     // }
-                    var fromLeftNode = owner.GetNodeFromGuid<AbstractMaterialNode>(redirNode.slotReferenceInput.nodeGuid);
+
+                    // Old way
+                    // var fromLeftNode = owner.GetNodeFromGuid<AbstractMaterialNode>(redirNode.slotReferenceInput.nodeGuid);
+                    // if (fromLeftNode != null)
+                    // {
+                    //     return ShaderGenerator.AdaptNodeOutput(fromLeftNode, redirNode.slotReferenceInput.slotId, inputSlot.concreteValueType);
+                    // }
+
+
+                    // Should work....
+                    var slotRef = redirNode.GetLeftMostSlotReference();
+                    var fromLeftNode = owner.GetNodeFromGuid<AbstractMaterialNode>(slotRef.nodeGuid);
+                    //Debug.Log("MUPPETS:: " + fromLeftNode.name);
                     if (fromLeftNode != null)
                     {
-                        return ShaderGenerator.AdaptNodeOutput(fromLeftNode, redirNode.slotReferenceInput.slotId, inputSlot.concreteValueType);
+                        return ShaderGenerator.AdaptNodeOutput(fromLeftNode, slotRef.slotId, inputSlot.concreteValueType);
                     }
 
-                    return fromNode.GetSlotValue(0, generationMode);
+                    // should we do this if redirect node doesnt have any input edges??
+                    return redirNode.GetSlotValue(0, generationMode);
+                    //return fromNode.GetSlotValue(0, generationMode);
+
                 }
 
                 var slot = fromNode.FindOutputSlot<MaterialSlot>(fromSocketRef.slotId);

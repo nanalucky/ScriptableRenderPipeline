@@ -72,16 +72,44 @@ namespace UnityEditor.ShaderGraph
                     if (connection.input.GetSlot().owner is RedirectNodeData redirectNode)
                     {
                         // If incoming node is redirect node we force the child to inherit the slot reference
-                        if (connection.output.GetSlot().owner is RedirectNodeData redirLeftNode)
-                        {
-                            redirectNode.slotReferenceInput = redirLeftNode.slotReferenceInput;
-                        }
+                        // if (connection.output.GetSlot().owner is RedirectNodeData redirLeftNode)
+                        // {
+                        //     redirectNode.slotReferenceInput = redirLeftNode.slotReferenceInput;
+                        // }
 
                         redirectNode.nodeView.UpdateSlots(connection);
                     }
                 }
             }
         }
+
+        // Get the left most slot referende
+        // If it ends with being a redirect node, then it means it is a dead end.
+        // if it is another node than a redirect node we use that and return that slot ref
+        // public SlotReference GetLeftMostSlotReference()
+        // {
+        //     foreach (var port in inputContainer.Children().OfType<ShaderPort>())
+        //     {
+        //         var slot = port.slot;
+        //         var graph = slot.owner.owner;
+        //         var edges = graph.GetEdges(slot.slotReference).ToList();
+        //         if (edges.Any())
+        //         {
+        //             var outputSlotRef = edges[0].outputSlot;
+        //             var nodeFromGuid = graph.GetNodeFromGuid(outputSlotRef.nodeGuid);
+        //             // If this is a redirect node we continue to look for the top one
+        //             // else we return the actual slot reference
+        //             if (nodeFromGuid is RedirectNodeData redirNode)
+        //             {
+        //                 return redirNode.nodeView.GetLeftMostSlotReference();
+        //             }
+        //
+        //             return outputSlotRef;
+        //         }
+        //     }
+        //
+        //     return new SlotReference();
+        // }
 
         // public SlotReference? GetLeftMostSlotReference()
         // {

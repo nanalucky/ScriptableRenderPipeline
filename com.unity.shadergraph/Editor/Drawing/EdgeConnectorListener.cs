@@ -37,14 +37,14 @@ namespace UnityEditor.ShaderGraph.Drawing
 
                 if (rightSlot.owner is RedirectNodeData redirectNodeData)
                 {
-                    if (leftSlot.owner is RedirectNodeData redirNodeLeft)
-                    {
-                        redirectNodeData.slotReferenceInput = redirNodeLeft.slotReferenceInput;
-                    }
-                    else
-                    {
-                        redirectNodeData.slotReferenceInput = leftSlot.slotReference;
-                    }
+                    // if (leftSlot.owner is RedirectNodeData redirNodeLeft)
+                    // {
+                    //     redirectNodeData.slotReferenceInput = redirNodeLeft.slotReferenceInput;
+                    // }
+                    // else
+                    // {
+                    //     redirectNodeData.slotReferenceInput = leftSlot.slotReference;
+                    // }
 
                     redirectNodeData.nodeView.UpdateSlots(edge);
                 }
