@@ -98,6 +98,8 @@ Pass
     $splice(DotsInstancingOptions)
     $splice(DotsInstancedProperties)
 
+    $splice(HybridV1InjectedBuiltinProperties)
+
     // Includes
     $splice(PreGraphIncludes)
 
