@@ -178,7 +178,8 @@ namespace UnityEngine.Rendering.HighDefinition
         /// <returns>The volume parameter.</returns>
         public VolumeParameter GetParameter(Volume volume, FieldInfo field)
         {
-            if (!volume.profileRef.TryGet(selectedComponentType, out VolumeComponent component))
+            var profile = volume.HasInstantiatedProfile() ? volume.profile : volume.sharedProfile;
+            if (!profile.TryGet(selectedComponentType, out VolumeComponent component))
                 return null;
             var param = GetParameter(component, field);
             if (!param.overrideState)
@@ -189,9 +190,11 @@ namespace UnityEngine.Rendering.HighDefinition
         float[] weights = null;
         float ComputeWeight(Volume volume)
         {
+            var profile = volume.HasInstantiatedProfile() ? volume.profile : volume.sharedProfile;
+
             if (!volume.gameObject.activeInHierarchy) return 0;
-            if (!volume.enabled || volume.profileRef == null || volume.weight <= 0f) return 0;
-            if (!volume.profileRef.TryGet(selectedComponentType, out VolumeComponent component)) return 0;
+            if (!volume.enabled || profile == null || volume.weight <= 0f) return 0;
+            if (!profile.TryGet(selectedComponentType, out VolumeComponent component)) return 0;
             if (!component.active) return 0;
 
             float weight = Mathf.Clamp01(volume.weight);
