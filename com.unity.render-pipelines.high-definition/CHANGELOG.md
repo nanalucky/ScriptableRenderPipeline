@@ -80,6 +80,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added support for iridescence in path tracing.
 - Added support for background color in path tracing.
 - Added a path tracing test to the test suite.
+- Added a warning and workaround instructions that appear when you enable XR single-pass after the first frame with the XR SDK.
+- Added the exposure sliders to the planar reflection probe preview
 - Added support for subsurface scattering in path tracing.
 
 ### Fixed
@@ -422,6 +424,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fix issue with AO being misaligned when multiple view are visible.
 - Fix issue that caused the clamp of camera rotation motion for motion blur to be ineffective.
 - Fixed a bug related to ray traced area light shadow history.
+- Fixed an issue where fog sky color mode could sample NaNs in the sky cubemap.
 - Fixed a leak in the PBR sky renderer.
 - Added a tooltip to the Ambient Mode parameter in the Visual Envionment volume component.
 - Static lighting sky now takes the default volume into account (this fixes discrepancies between baked and realtime lighting).
@@ -430,6 +433,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed invalid cast for realtime reflection probes (case 1220504)
 - Fixed invalid game view rendering when disabling all cameras in the scene (case 1105163)
 - Hide reflection probes in the renderer components.
+- Fixed infinite reload loop while displaying Light's Shadow's Link Light Layer in Inspector of Prefab Asset.
+- Fixed the culling was not disposed error in build log.
+- Fixed the cookie atlas size and planar atlas size being too big after an upgrade of the HDRP asset.
 
 ### Changed
 - Color buffer pyramid is not allocated anymore if neither refraction nor distortion are enabled
@@ -515,6 +521,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Moved BeginCameraRendering callback right before culling.
 - Renamed the cubemap used for diffuse convolution to a more explicit name for the memory profiler.
 - Improved behaviour of transmission color on transparent surfaces in path tracing.
+- Light dimmer can now get values higher than one and was renamed to multiplier in the UI.
+- Removed info box requesting volume component for Visual Environment and updated the documentation with the relevant information.
 - Improved light selection oracle for light sampling in path tracing.
 
 ## [7.1.1] - 2019-09-05
