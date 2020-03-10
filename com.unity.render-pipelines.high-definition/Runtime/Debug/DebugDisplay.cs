@@ -1143,6 +1143,11 @@ namespace UnityEngine.Rendering.HighDefinition
                 componentNames = new List<GUIContent>() { new GUIContent("None") };
                 componentValues = new List<int>() { componentIndex++ };
 
+#if UNITY_EDITOR
+                componentNames.Add(new GUIContent() { text = "Editor Camera" });
+                componentValues.Add(componentIndex++);
+#endif
+
                 foreach (var camera in VolumeDebugSettings.cameras)
                 {
                     componentNames.Add(new GUIContent() { text = camera.name });
@@ -1152,8 +1157,8 @@ namespace UnityEngine.Rendering.HighDefinition
                 list.Add(new DebugUI.EnumField
                 {
                     displayName = "Camera",
-                    getter = () => data.volumeDebugSettings.selectedCamera,
-                    setter = value => data.volumeDebugSettings.selectedCamera = value,
+                    getter = () => data.volumeDebugSettings.selectedCameraIndex,
+                    setter = value => data.volumeDebugSettings.selectedCameraIndex= value,
                     enumNames = componentNames.ToArray(),
                     enumValues = componentValues.ToArray(),
                     getIndex = () => data.volumeCameraEnumIndex,
@@ -1161,7 +1166,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     onValueChanged = RefreshVolumeDebug,
                 });
 
-                if (data.volumeDebugSettings.selectedCamera != 0)
+                if (data.volumeDebugSettings.selectedCameraIndex != 0)
                 {
                     DebugUI.Widget makeWidget(string name, VolumeParameter param)
                     {
@@ -1219,18 +1224,22 @@ namespace UnityEngine.Rendering.HighDefinition
                     var row = new DebugUI.Table.Row()
                     {
                         displayName = "Volume Info",
-                        children = { new DebugUI.Value() { displayName = "Interpolated Value", getter = () => {
-                                var newVolumes = data.volumeDebugSettings.GetVolumes();
-                                if (data.volumeDebugSettings.RefreshVolumes(newVolumes))
-                                    RefreshVolumeDebug(null, false);
-                                else
+                        children = { new DebugUI.Value() { displayName = "Interpolated Value",
+                            getter = () => {
+                                if (data.volumeDebugSettings.selectedCameraIndex != 0)
                                 {
-                                    for (int i = 0; i < newVolumes.Length; i++)
+                                    var newVolumes = data.volumeDebugSettings.GetVolumes();
+                                    if (!data.volumeDebugSettings.RefreshVolumes(newVolumes))
                                     {
-                                        var visible = data.volumeDebugSettings.VolumeHasInfluence(newVolumes[i]);
-                                        table.SetColumnVisibility(i + 1, visible);
+                                        for (int i = 0; i < newVolumes.Length; i++)
+                                        {
+                                            var visible = data.volumeDebugSettings.VolumeHasInfluence(newVolumes[i]);
+                                            table.SetColumnVisibility(i + 1, visible);
+                                        }
+                                        return "";
                                     }
                                 }
+                                RefreshVolumeDebug(null, false);
                                 return "";
                             }
                         } }

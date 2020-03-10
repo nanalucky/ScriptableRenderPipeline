@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
+using UnityEditor;
 
 namespace UnityEngine.Rendering.HighDefinition
 {
@@ -10,19 +11,56 @@ namespace UnityEngine.Rendering.HighDefinition
     /// </summary>
     public class VolumeDebugSettings
     {
-        /// <summary>Current camera to debug.</summary>
-        public int      selectedCamera = 0;
         /// <summary>Current volume component to debug.</summary>
         public int      selectedComponent = 0;
+
+        int m_SelectedCamera = 0;
+
+        /// <summary>Current camera index to debug.</summary>
+        public int selectedCameraIndex
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (m_SelectedCamera < 0 || m_SelectedCamera > cameras.Count + 1)
+                    return 0;
+#else
+                if (m_SelectedCamera < 0 || m_SelectedCamera > cameras.Count)
+                    return 0;
+#endif
+                return m_SelectedCamera;
+            }
+            set { m_SelectedCamera = value; }
+        }
+
+        /// <summary>Current camera to debug.</summary>
+        public Camera selectedCamera
+        {
+            get
+            {
+#if UNITY_EDITOR
+                if (m_SelectedCamera <= 0 || m_SelectedCamera > cameras.Count + 1)
+                    return null;
+                if (m_SelectedCamera == 1)
+                    return SceneView.lastActiveSceneView.camera;
+                else
+                    return cameras[m_SelectedCamera - 2].GetComponent<Camera>();
+#else
+                if (m_SelectedCamera <= 0 || m_SelectedCamera > cameras.Count)
+                    return null;
+                return cameras[m_SelectedCamera - 1].GetComponent<Camera>();
+#endif
+            }
+        }
 
         /// <summary>Selected camera volume stack.</summary>
         public VolumeStack selectedCameraVolumeStack
         {
             get
             {
-                if (selectedCamera <= 0 || selectedCamera > cameras.Count)
+                Camera cam = selectedCamera;
+                if (cam == null)
                     return null;
-                Camera cam = cameras[selectedCamera - 1].GetComponent<Camera>();
                 var stack = HDCamera.GetOrCreate(cam).volumeStack;
                 if (stack != null)
                     return stack;
@@ -35,9 +73,17 @@ namespace UnityEngine.Rendering.HighDefinition
         {
             get
             {
-                if (selectedCamera <= 0 || selectedCamera > cameras.Count)
+#if UNITY_EDITOR
+                if (m_SelectedCamera <= 0 || m_SelectedCamera > cameras.Count + 1)
                     return (LayerMask)0;
-                return cameras[selectedCamera - 1].volumeLayerMask;
+                if (m_SelectedCamera == 1)
+                    return SceneView.lastActiveSceneView.camera.GetComponent<HDAdditionalCameraData>().volumeLayerMask;
+                return cameras[m_SelectedCamera - 2].volumeLayerMask;
+#else
+                if (m_SelectedCamera <= 0 || m_SelectedCamera > cameras.Count)
+                    return (LayerMask)0;
+                return cameras[m_SelectedCamera - 1].volumeLayerMask;
+#endif
             }
         }
 
@@ -46,17 +92,19 @@ namespace UnityEngine.Rendering.HighDefinition
         {
             get
             {
-                if (selectedCamera <= 0 || selectedCamera > cameras.Count)
+                Camera cam = selectedCamera;
+                if (cam == null)
                     return Vector3.zero;
-                Camera cam = cameras[selectedCamera - 1].GetComponent<Camera>();
 
                 var anchor = HDCamera.GetOrCreate(cam).volumeAnchor;
                 if (anchor == null) // means the hdcamera has not been initialized
                 {
                     // So we have to update the stack manually
-                    anchor = cameras[selectedCamera - 1].volumeAnchorOverride;
+                    anchor = cam.GetComponent<HDAdditionalCameraData>().volumeAnchorOverride;
                     if (anchor == null) anchor = cam.transform;
-                    VolumeManager.instance.Update(selectedCameraVolumeStack, anchor, selectedCameraLayerMask);
+                    var stack = selectedCameraVolumeStack;
+                    if (stack != null)
+                        VolumeManager.instance.Update(stack, anchor, selectedCameraLayerMask);
                 }
                 return anchor.position;
             }
@@ -204,6 +252,8 @@ namespace UnityEngine.Rendering.HighDefinition
 
         bool ChangedStates(VolumeParameter[,] newStates)
         {
+            if (savedStates.GetLength(1) != newStates.GetLength(1))
+                return true;
             for (int i = 0; i < savedStates.GetLength(0); i++)
             {
                 for (int j = 0; j < savedStates.GetLength(1); j++)
