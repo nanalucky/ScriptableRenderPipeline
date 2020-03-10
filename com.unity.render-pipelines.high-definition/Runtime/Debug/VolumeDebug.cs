@@ -77,7 +77,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 if (m_SelectedCamera <= 0 || m_SelectedCamera > cameras.Count + 1)
                     return (LayerMask)0;
                 if (m_SelectedCamera == 1)
-                    return SceneView.lastActiveSceneView.camera.GetComponent<HDAdditionalCameraData>().volumeLayerMask;
+                    return -1;
                 return cameras[m_SelectedCamera - 2].volumeLayerMask;
 #else
                 if (m_SelectedCamera <= 0 || m_SelectedCamera > cameras.Count)
