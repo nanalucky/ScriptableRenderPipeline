@@ -292,6 +292,7 @@ namespace UnityEditor.ShaderGraph.Drawing
                 var leftSlot = context.edge.output.GetSlot();
                 var rightSlot = context.edge.input.GetSlot();
 
+                nodeData.slotReferenceInput = leftSlot.slotReference;
                 // Valuetype gets the type should be the type for input and output
                 switch(leftSlot.valueType)
                 {
@@ -316,16 +317,16 @@ namespace UnityEditor.ShaderGraph.Drawing
                         nodeData.AddSlot(new DynamicVectorMaterialSlot(1, "", "", SlotType.Output, Vector4.zero));
                         break;
                     case SlotValueType.Matrix2:
-                        nodeData.AddSlot(new Matrix2MaterialSlot(0, "", "", SlotType.Input));
-                        nodeData.AddSlot(new Matrix2MaterialSlot(1, "", "", SlotType.Output));
+                        nodeData.AddSlot(new DynamicMatrixMaterialSlot(0, "", "", SlotType.Input));
+                        nodeData.AddSlot(new DynamicMatrixMaterialSlot(1, "", "", SlotType.Output));
                         break;
                     case SlotValueType.Matrix3:
-                        nodeData.AddSlot(new Matrix3MaterialSlot(0, "", "", SlotType.Input));
-                        nodeData.AddSlot(new Matrix3MaterialSlot(1, "", "", SlotType.Output));
+                        nodeData.AddSlot(new DynamicMatrixMaterialSlot(0, "", "", SlotType.Input));
+                        nodeData.AddSlot(new DynamicMatrixMaterialSlot(1, "", "", SlotType.Output));
                         break;
                     case SlotValueType.Matrix4:
-                        nodeData.AddSlot(new Matrix4MaterialSlot(0, "", "", SlotType.Input));
-                        nodeData.AddSlot(new Matrix4MaterialSlot(1, "", "", SlotType.Output));
+                        nodeData.AddSlot(new DynamicMatrixMaterialSlot(0, "", "", SlotType.Input));
+                        nodeData.AddSlot(new DynamicMatrixMaterialSlot(1, "", "", SlotType.Output));
                         break;
                     case SlotValueType.Texture2D:
                         nodeData.AddSlot(new Texture2DMaterialSlot(0, "", "", SlotType.Input));
@@ -530,10 +531,11 @@ namespace UnityEditor.ShaderGraph.Drawing
                     {
                         if (edge.input.node is IShaderNodeView materialNodeView)
                             nodesToUpdate.Add(materialNodeView);
-                        if (edge.input.node is RedirectNode)
-                        {
-                            Debug.Log(edge.input.node);
-                        }
+                        // if (edge.input.node is RedirectNode)
+                        // {
+                        //     // MT what should I do here, If Anything?
+                        //     Debug.Log(edge.input.node);
+                        // }
                     }
                     if (edge.output != null)
                     {
@@ -677,8 +679,6 @@ namespace UnityEditor.ShaderGraph.Drawing
                     .FirstOrDefault(p => p.node != null && p.node.guid == node.guid);
                 if (nodeView != null)
                 {
-
-
                     nodeView.Dispose();
                     m_GraphView.RemoveElement((Node)nodeView);
 
@@ -786,7 +786,6 @@ namespace UnityEditor.ShaderGraph.Drawing
                     var nodeView = (IShaderNodeView)edgeView.input.node;
                     if (nodeView?.node != null)
                     {
-                        Debug.Log(nodeView.node);
                         nodesToUpdate.Add(nodeView);
                     }
 
@@ -959,7 +958,6 @@ namespace UnityEditor.ShaderGraph.Drawing
                 {
                     if (element is ShaderGroup groupView && groupView.userData.guid == stickyNoteData.groupGuid)
                     {
-                        // Todo for redirect nodes
                         groupView.AddElement(stickyNote);
                     }
                 }
@@ -1046,7 +1044,6 @@ namespace UnityEditor.ShaderGraph.Drawing
                 if (nodeView is MaterialNodeView materialNodeView)
                 {
                     materialNodeView.UpdatePortInputTypes();
-                    Debug.Log("sagsf" + nodeView.title);
                 }
 
                 //List<RedirectNodeView> redirectNodesToUpdate = new List<RedirectNodeView>();
@@ -1066,26 +1063,12 @@ namespace UnityEditor.ShaderGraph.Drawing
                                 // If child node of this slot is a normal Node, not a redirect node add this Redirect node to the list.
                                 if (parentNode != null && parentNode.GetType() != typeof(RedirectNodeData))
                                 {
-                                    //Debug.Log("FOUND PARENT:: " + parentNode.name);
-                                    //if (!redirectNodesToUpdate.Contains(redirectNodeView))
-                                    //{
-                                        redirectNodeView.UpdatePortInputTypes();
-                                        //redirectNodesToUpdate.Add(redirectNodeView);
-                                        //Debug.Log("Found one");
-                                    //}
+                                    redirectNodeView.UpdatePortTypes();
                                 }
                             }
                         }
                     }
-
-
-
-                    //redirectNodeView.UpdateSlots();
-
-                    //Debug.Log("vlsdfj" + nodeView.title);
                 }
-
-                //Debug.Log("LENGTH: " + redirectNodesToUpdate.Count);
 
                 foreach (var anchorView in nodeView.outputContainer.Children().OfType<Port>())
                 {
@@ -1120,41 +1103,6 @@ namespace UnityEditor.ShaderGraph.Drawing
                     }
                 }
             }
-
-
-
-            // var redirectNodes = GetNodes<RedirectNodeData>().ToArray();
-            // Debug.Log("REDIRS " +redirectNodes.Count());
-            // List<RedirectNodeData> redirectNodesToUpdate = new List<RedirectNodeData>();
-            // foreach (RedirectNodeData redirectNode in redirectNodes)
-            // {
-            //     redirectNode.GetInputSlots(slots);
-            //     foreach (var inputSlot in slots)
-            //     {
-            //
-            //         var nodeEdges = GetEdges(inputSlot.slotReference);
-            //         foreach (var edge in nodeEdges)
-            //         {
-            //             var fromSocketRef = edge.outputSlot;
-            //             var parentNode = GetNodeFromGuid(fromSocketRef.nodeGuid);
-            //             // If child node of this slot is a normal Node, not a redirect node add this Redirect node to the list.
-            //             if (parentNode != null && parentNode.GetType() != typeof(RedirectNodeData))
-            //             {
-            //                 Debug.Log("FOUND PARENT:: " + parentNode.name);
-            //                 //RedirectNodeData redirData = childNode as RedirectNodeData;
-            //                 if (!redirectNodesToUpdate.Contains(redirectNode))
-            //                 {
-            //
-            //                     redirectNodesToUpdate.Add(redirectNode);
-            //                     Debug.Log("Found one");
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
-            //
-            // Debug.Log("LENGTH: " + redirectNodesToUpdate.Count);
-
         }
 
         void OnPrimaryMasterChanged()

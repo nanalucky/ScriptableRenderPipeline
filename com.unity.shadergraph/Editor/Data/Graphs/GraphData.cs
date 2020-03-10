@@ -615,86 +615,61 @@ namespace UnityEditor.ShaderGraph
 
             foreach (var edge in edges.ToArray())
             {
-                Debug.Log(edge);
                 RemoveEdgeNoValidate(edge);
             }
 
             foreach (var serializableNode in nodes)
             {
                 // Check if it is a Redirect Node
-                    // Get the edges and then re-create all Edges
-                    if (serializableNode is RedirectNodeData redirectNode)
+                // Get the edges and then re-create all Edges
+                // This only works if it has all the edges.
+                // If one edge is already deleted then we can not re-create.
+                if (serializableNode is RedirectNodeData redirectNode)
+                {
+                    SlotReference leftSlot = new SlotReference();
+
+                    using (var tempInputSlots = PooledList<MaterialSlot>.Get())
                     {
-                        Debug.Log("MUPPETS");
+                        redirectNode.GetInputSlots(tempInputSlots);
 
-                        SlotReference leftSlot = new SlotReference();
-
-                        using (var tempSlots = PooledList<MaterialSlot>.Get())
+                        foreach (var inputSlot in tempInputSlots)
                         {
-                            redirectNode.GetInputSlots(tempSlots);
-
-                            foreach (var inputSlot in tempSlots)
+                            // Get the slot where this edge starts from.
+                            IEnumerable<IEdge> inEdges = GetEdges(inputSlot.slotReference);
+                            if (!inEdges.Any())
                             {
-                                // Get the slot where this edge starts from.
-                                leftSlot = GetEdges(inputSlot.slotReference).ToList()[0].outputSlot;
-                                Debug.Log(leftSlot);
+                                continue;
                             }
+
+                            leftSlot = inEdges.ToList()[0].outputSlot;
                         }
-
-                        List<SlotReference> rightSlots =  new List<SlotReference>();
-                        using (var tempPooledListSlots = PooledList<MaterialSlot>.Get())
-                        {
-                            redirectNode.GetOutputSlots(tempPooledListSlots);
-
-                            foreach (var outputSlot in tempPooledListSlots)
-                            {
-                                // Get the slot where this edge ends.
-                                var outPutEdges = GetEdges(outputSlot.slotReference).ToList();
-                                foreach (var edge in outPutEdges)
-                                {
-                                    rightSlots.Add(edge.inputSlot);
-                                }
-                            }
-                        }
-
-                        foreach (SlotReference slotReference in rightSlots)
-                        {
-                            Connect(leftSlot, slotReference);
-
-                            // Edge edge = new Edge(slotReference, leftSlot);
-                            // m_Edges.Add(edge);
-                        }
-                        Debug.Log("FLORP");
-                        // var inSlots = redirectNode.GetInputSlots<MaterialSlot>();
-                        // var outSlots = redirectNode.GetOutputSlots<MaterialSlot>();
-                        //
-                        //
-                        // IEnumerable<IEdge> edges = new List<IEdge>();
-                        // foreach (MaterialSlot inputSlot in inSlots)
-                        // {
-                        //     edges = m_Graph.GetEdges(inputSlot.slotReference);
-                        // }
-                        //
-                        //
-                        // Debug.Log(inSlots);
-
-                        // foreach (var edge in m_Graph.edges)
-                        // {
-                        //     if (edge.inputSlot == inSlots[0])
-                        //     {
-                        //
-                        //     }
-                        // }
-
-                        // var edge = redirectNode.m_Edge;
-                        // var leftSlot = edge.output.GetSlot();
-                        // var rightSlot = edge.input.GetSlot();
-                        // var leftNode = m_Graph.GetNodeFromGuid(leftSlot.slotReference.nodeGuid);
-                        // var rightNode = m_Graph.GetNodeFromGuid(rightSlot.slotReference.nodeGuid);
-                        // Debug.Log(leftNode.name);
-                        // Debug.Log(rightNode.name);
                     }
 
+                    List<SlotReference> rightSlots =  new List<SlotReference>();
+                    using (var tempOutputSlots = PooledList<MaterialSlot>.Get())
+                    {
+                        redirectNode.GetOutputSlots(tempOutputSlots);
+                        foreach (var outputSlot in tempOutputSlots)
+                        {
+                            // Get the slot where this edge ends.
+                            var outEdges = GetEdges(outputSlot.slotReference).ToList();
+                            if (!outEdges.Any())
+                            {
+                                continue;
+                            }
+
+                            foreach (var edge in outEdges)
+                            {
+                                rightSlots.Add(edge.inputSlot);
+                            }
+                        }
+                    }
+
+                    foreach (SlotReference rightSlot in rightSlots)
+                    {
+                        Connect(leftSlot, rightSlot);
+                    }
+                }
 
                 RemoveNodeNoValidate(serializableNode);
             }

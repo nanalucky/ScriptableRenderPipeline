@@ -279,8 +279,24 @@ namespace UnityEditor.ShaderGraph
                 if (fromNode == null)
                     return string.Empty;
 
-                if (fromNode is RedirectNodeData)
+                if (fromNode is RedirectNodeData redirNode)
                 {
+                    //redirNode.m_OutputConcreteSlotValueType = inputSlot.concreteValueType;
+                    // Need to find the end of this chain of redirect nodes
+                    // var fromLeftSlot = redirNode.nodeView.GetLeftMostSlotReference();
+                    // if (fromLeftSlot != null)
+                    // {
+                    //     // need to know which slot id it is>.s.skosajfdoijasdpoifjsa
+                    //     //var nodeFromGuid = graph.GetNodeFromGuid(outputSlotRef.nodeGuid);
+                    //     var fromLeftNode = owner.GetNodeFromGuid<AbstractMaterialNode>(fromLeftSlot.Value.nodeGuid);
+                    //     return ShaderGenerator.AdaptNodeOutput(fromLeftNode, fromLeftSlot.Value.slotId, inputSlot.concreteValueType);
+                    // }
+                    var fromLeftNode = owner.GetNodeFromGuid<AbstractMaterialNode>(redirNode.slotReferenceInput.nodeGuid);
+                    if (fromLeftNode != null)
+                    {
+                        return ShaderGenerator.AdaptNodeOutput(fromLeftNode, redirNode.slotReferenceInput.slotId, inputSlot.concreteValueType);
+                    }
+
                     return fromNode.GetSlotValue(0, generationMode);
                 }
 
@@ -288,6 +304,7 @@ namespace UnityEditor.ShaderGraph
                 if (slot == null)
                     return string.Empty;
 
+                // If child node is
                 return ShaderGenerator.AdaptNodeOutput(fromNode, slot.id, inputSlot.concreteValueType);
             }
 

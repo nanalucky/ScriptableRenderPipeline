@@ -1,3 +1,4 @@
+using UnityEditor.Graphing;
 using UnityEngine;
 using Edge = UnityEditor.Experimental.GraphView.Edge;
 
@@ -6,6 +7,14 @@ namespace UnityEditor.ShaderGraph
     class RedirectNodeData : AbstractMaterialNode
     {
         public Edge m_Edge;
+
+        SlotReference m_slotReferenceInput;
+        public SlotReference slotReferenceInput
+        {
+            get => m_slotReferenceInput;
+            set => m_slotReferenceInput = value;
+        }
+
         public RedirectNodeData()
         {
             name = "Redirect Node";

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -56,6 +57,7 @@ namespace UnityEditor.ShaderGraph
         //public void UpdateSlots(IEnumerable<MaterialSlot> slots)
         public void UpdateSlots(Edge edge)
         {
+            // Need also to force the slotreference to update on all children.
             // Set the color of the ports
             foreach (var port in inputContainer.Query<Port>().ToList())
             {
@@ -69,11 +71,41 @@ namespace UnityEditor.ShaderGraph
                 {
                     if (connection.input.GetSlot().owner is RedirectNodeData redirectNode)
                     {
+                        // If incoming node is redirect node we force the child to inherit the slot reference
+                        if (connection.output.GetSlot().owner is RedirectNodeData redirLeftNode)
+                        {
+                            redirectNode.slotReferenceInput = redirLeftNode.slotReferenceInput;
+                        }
+
                         redirectNode.nodeView.UpdateSlots(connection);
                     }
                 }
             }
         }
+
+        // public SlotReference? GetLeftMostSlotReference()
+        // {
+        //     foreach (var port in inputContainer.Children().OfType<ShaderPort>())
+        //     {
+        //         var slot = port.slot;
+        //         var graph = slot.owner.owner;
+        //         var edges = graph.GetEdges(slot.slotReference).ToList();
+        //         if (edges.Any())
+        //         {
+        //             var outputSlotRef = edges[0].outputSlot;
+        //             var nodeFromGuid = graph.GetNodeFromGuid(outputSlotRef.nodeGuid);
+        //             // If this is a redirect node we continue to look for the top one
+        //             if (nodeFromGuid is RedirectNodeData redirNode)
+        //             {
+        //                 return redirNode.nodeView.GetLeftMostSlotReference();
+        //             }
+        //
+        //             return outputSlotRef;
+        //         }
+        //     }
+        //
+        //     return null;
+        // }
 
         void GetAllRedirectNodes(RedirectNodeData node, ref List<RedirectNodeData> allNodes)
         {
@@ -99,7 +131,7 @@ namespace UnityEditor.ShaderGraph
             }
         }
 
-        public void UpdatePortInputTypes()
+        public void UpdatePortTypes()
         {
             // Get all the RedirectNodes and update them all in one go.
             List<RedirectNodeData> connectedRedirectNodes = new List<RedirectNodeData>();
@@ -127,55 +159,6 @@ namespace UnityEditor.ShaderGraph
                     port.visualClass = concreteValueType;
                 }
             }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                // foreach (Edge graphEdge in graph.edges)
-                // {
-                //     graph.
-                // }
-                //var edge = graph.GetEdges(slot.slotReference).First();
-
-                //anchor.visualClass = edges.output.GetSlot().concreteValueType.ToClassName();
-
-
-
-
-
-
-
-
-                //Debug.Log(edges.Count());
-            //}
-            // // Set the color of the ports
-            // foreach (var port in inputContainer.Query<Port>().ToList())
-            // {
-            //     port.visualClass = edge.output.GetSlot().concreteValueType.ToClassName();
-            // }
-            //
-            // foreach (var port in outputContainer.Query<Port>().ToList())
-            // {
-            //     port.visualClass = edge.output.GetSlot().concreteValueType.ToClassName();
-            //     foreach (Edge connection in port.connections)
-            //     {
-            //         if (connection.input.GetSlot().owner is RedirectNodeData redirictNode)
-            //         {
-            //             redirictNode.nodeView.UpdateSlots(connection);
-            //         }
-            //     }
-            // }
         }
 
         public void AddSlots(IEnumerable<MaterialSlot> slots)
@@ -238,20 +221,15 @@ namespace UnityEditor.ShaderGraph
             userData = null;
         }
 
-        public void OnModified(ModificationScope scope)
+        public void UpdatePortInputTypes()
         {
 
         }
 
-        // public void UpdatePortInputTypes()
-        // {
-        //     // foreach (var anchor in inputContainer.Children().Concat(outputContainer.Children()).OfType<ShaderPort>())
-        //     // {
-        //     //     var slot = anchor.slot;
-        //     //     //anchor.portName = slot.displayName;
-        //     //     anchor.visualClass = slot.concreteValueType.ToClassName();
-        //     // }
-        // }
+        public void OnModified(ModificationScope scope)
+        {
+
+        }
 
         public void SetColor(Color newColor)
         {
