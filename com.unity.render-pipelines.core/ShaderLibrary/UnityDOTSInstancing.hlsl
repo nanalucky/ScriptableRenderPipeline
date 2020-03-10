@@ -128,7 +128,10 @@ for t, c, sz in (
 // TODO: Shader feature level to compute only
 ByteAddressBuffer unity_DOTSInstanceData;
 
-CBUFFER_START(UnityDOTSInstancing_InstanceVisibility)
+// The name of this cbuffer has to start with "UnityInstancing" so it's
+// detected as an "instancing cbuffer" by some platforms that use string matching
+// to detect this.
+CBUFFER_START(UnityInstancingDOTS_InstanceVisibility)
     uint4 unity_DOTSVisibleInstances[UNITY_INSTANCED_ARRAY_SIZE];
 CBUFFER_END
 
