@@ -459,6 +459,18 @@ namespace UnityEngine.Rendering.Universal
             if (isOffscreenRender)
                 return requiresBlitForOffscreenCamera;
 
+#if UNITY_ANDROID
+            if (SystemInfo.graphicsDeviceType != GraphicsDeviceType.Vulkan)
+            {
+                if (!cameraData.requiresOpaqueTexture && cameraData.requiresDepthTexture)
+                {
+                    // GLES can not use render texture's depth buffer with the color buffer of the backbuffer
+                    // in such case we create a color texture for it too.
+                    return true;
+                }
+            }
+#endif
+
             return requiresBlitForOffscreenCamera || cameraData.isSceneViewCamera || isScaledRender || cameraData.isHdrEnabled ||
                    !isCompatibleBackbufferTextureDimension || !cameraData.isDefaultViewport || isCapturing ||
                    (Display.main.requiresBlitToBackbuffer && !isStereoEnabled);
